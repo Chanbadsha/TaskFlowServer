@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 // Connect to DB
 async function connectDB() {
   try {
-    await client.connect();
+    // await client.connect();
     console.log("Connected to MongoDB");
   } catch (err) {
     console.error("MongoDB Connection Error:", err);
@@ -34,7 +34,7 @@ connectDB();
 
 const TaskList = client.db("Taskflow").collection("Tasks");
 
-// ✅ Get all tasks
+// Get all tasks
 app.get("/tasks", async (req, res) => {
   try {
     const tasks = await TaskList.find().toArray();
@@ -44,7 +44,7 @@ app.get("/tasks", async (req, res) => {
   }
 });
 
-// ✅ Get tasks by email
+//  Get tasks by email
 app.get("/task", async (req, res) => {
   const { email } = req.query;
   if (!email) {
@@ -62,16 +62,16 @@ app.get("/task", async (req, res) => {
   }
 });
 
-// ✅ Create a new task
+//  Create a new task
 app.post("/tasks", async (req, res) => {
   try {
     const {
       title,
       deadline,
       priority,
-      category,
+      status,
       description,
-      taskImg,
+
       userEmail,
       userName,
     } = req.body;
@@ -81,9 +81,9 @@ app.post("/tasks", async (req, res) => {
       title,
       deadline,
       priority,
-      category,
+      status,
       description,
-      taskImg,
+
       timestamp: new Date().toISOString().split("T")[0], // YYYY-MM-DD
     };
 
@@ -117,12 +117,13 @@ app.patch("/task/:id", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Database update failed", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Database update failed", error });
   }
 });
 
-
-// ✅ Delete a task by ID
+// Delete a task by ID
 app.delete("/tasks/:id", async (req, res) => {
   try {
     const { id } = req.params;
