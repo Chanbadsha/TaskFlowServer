@@ -73,6 +73,26 @@ async function run() {
       }
     });
 
+// Get All Task via email
+app.get('/task', async (req, res) => {
+  const { email } = req.query;  
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email query parameter is required' });
+  }
+  
+  const filter = { userEmail: email };  
+  
+  try {
+    const result = await TaskList.find(filter).toArray();  
+    res.status(200).send(result);  
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ message: 'Error fetching tasks', error: err });
+  }
+});
+
+
     // Delete a task by ID
     app.delete("/tasks/:id", async (req, res) => {
       try {
