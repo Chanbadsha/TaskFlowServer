@@ -27,23 +27,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-
-
-
-    const TaskList = client
-    .db("Taskflow")
-    .collection("Tasks");
-
-
-
-
-
-
-
-
-
-
-
+    const TaskList = client.db("Taskflow").collection("Tasks");
 
     // Routes for tasks
     // Get all tasks
@@ -59,8 +43,16 @@ async function run() {
     // Create a new task
     app.post("/tasks", async (req, res) => {
       try {
-        const { title, deadline, priority, category, description, taskImg,userEmail,userName } =
-          req.body;
+        const {
+          title,
+          deadline,
+          priority,
+          category,
+          description,
+          taskImg,
+          userEmail,
+          userName,
+        } = req.body;
         const task = {
           userName,
           userEmail,
@@ -70,19 +62,32 @@ async function run() {
           category,
           description,
           taskImg,
-          timestamp: new Date().toISOString().split('T')[0], // This will store only the date part in the format YYYY-MM-DD
+          timestamp: new Date().toISOString().split("T")[0], // This will store only the date part in the format YYYY-MM-DD
         };
-        console.log(task)
+        console.log(task);
         const result = await TaskList.insertOne(task);
         res.status(201).json("Task Save Successfully");
-      } 
-      catch (err) {
-        console.log(err)
+      } catch (err) {
+        console.log(err);
         res.status(400).json({ message: "Error creating task", error: err });
       }
     });
 
-  
+    // Delete a task by ID
+    app.delete("/tasks/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const filter = { _id: id };
+        const result = await TaskList.deleteOne(filter);
+        if (result.deletedCount === 0) {
+          res.status(404).json({ message: "Task not found" });
+        } else {
+          res.status(200).json({ message: "Task deleted successfully" });
+        }
+      } catch (err) {
+        res.status(400).json({ message: "Error deleting task", error: err });
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
