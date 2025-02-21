@@ -103,12 +103,20 @@ app.patch("/task/:id", async (req, res) => {
   const taskId = req.params.id;
   const { status } = req.body;
 
-  // Update one task by its ObjectId
+  const completeDate = new Date().toISOString().split("T")[0];
+  const filter = { _id: new ObjectId(taskId) };
+
+  // Construct updateDoc based on task status
+  const updateDoc = {
+    $set: { status: status },
+  };
+
+  if (status === "Done") {
+    updateDoc.$set.deadline = completeDate;
+  }
+
   try {
-    const result = await TaskList.updateOne(
-      { _id: new ObjectId(taskId) },
-      { $set: { status: status } }
-    );
+    const result = await TaskList.updateOne(filter, updateDoc);
 
     if (result.modifiedCount > 0) {
       res.status(200).json({ success: true, message: "Task status updated" });
@@ -116,11 +124,32 @@ app.patch("/task/:id", async (req, res) => {
       res.status(404).json({ success: false, message: "No changes applied" });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res
       .status(500)
       .json({ success: false, message: "Database update failed", error });
   }
+});
+
+// Edit Full Task
+// Edit Full Task
+app.patch("/taskdata/:id", async (req, res) => {
+  const taskId = req.params.id;
+
+  const { title, deadline, priority, status, description } = req.body;
+  const filter = { _id: taskId };
+  const updateDoc = {
+    $set: {
+      title,
+      deadline,
+      priority,
+      status,
+      description,
+    },
+  };
+
+  const result = await TaskList.updateOne(filter, updateDoc);
+  res.send( result);
 });
 
 // Delete a task by ID
