@@ -33,6 +33,7 @@ async function connectDB() {
 connectDB();
 
 const TaskList = client.db("Taskflow").collection("Tasks");
+const UserList = client.db("Taskflow").collection("Users");
 
 // Get all tasks
 app.get("/tasks", async (req, res) => {
@@ -42,6 +43,18 @@ app.get("/tasks", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Error fetching tasks", error: err });
   }
+});
+
+// Save User
+app.post("/userSave", async (req, res) => {
+  const UserInfo = await req.body;
+  const email = UserInfo.email;
+  const findUser = await UserList.findOne({ email: email });
+  if (findUser) {
+    return res.status(200).json("User Already save");
+  }
+  const result = await UserList.insertOne(UserInfo);
+  res.send(result);
 });
 
 //  Get tasks by email
@@ -149,7 +162,7 @@ app.patch("/taskdata/:id", async (req, res) => {
   };
 
   const result = await TaskList.updateOne(filter, updateDoc);
-  res.send( result);
+  res.send(result);
 });
 
 // Delete a task by ID
